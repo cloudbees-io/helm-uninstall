@@ -1,0 +1,53 @@
+name: helm-uninstall-action
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  test:
+    steps:
+    - name: write kube config
+      uses: docker://alpine:3.17
+      shell: sh
+      run: |
+        mkdir -p ${HOME}/.kube
+        echo -e "${{ secrets.STAGING_CONFIG }}" > ${HOME}/.kube/config
+    - name: checkout
+      uses: cloudbees-io/checkout@v1
+    - name: install a helm chart
+      uses: cloudbees-io/helm-install@v1
+      with:
+        release-name: nginx-uninstall
+        chart-location: oci://ghcr.io/nginxinc/charts/nginx-ingress
+        version: 0.18.0
+    - name: uninstall a helm chart with dry-run
+      uses: .
+      with:
+        release-name: nginx-uninstall
+        timeout: 1m
+        dry-run: "true"
+    - name: uninstall a helm chart
+      uses: .
+      with:
+        release-name: nginx-uninstall
+        timeout: 1m
+  build:
+    steps:
+    - name: get source code
+      uses: cloudbees-io/checkout@v1
+    - id: dockerconfig
+      name: Configure container registry credentials
+      uses: cloudbees-io/configure-oci-credentials@v0
+      with:
+        registry: ${{ vars.STAGING_DOCKER_REGISTRY }}
+        username: ${{ secrets.STAGING_DOCKER_USERNAME }}
+        password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
+    - name: docker build and publish
+      uses: cloudbees-io/kaniko@v1
+      with:
+        dockerconfigjson: ${{ secrets.dockerconfigjson }}
+        destination: registry.saas-dev.beescloud.com/staging/helm-uninstall-action:${{ cloudbees.scm.branch }}${{ cloudbees.scm.branch == 'main' && ',registry.saas-dev.beescloud.com/staging/helm-uninstall-action:latest' || '' }}
+        labels: maintaner=sdp-pod-3,email=engineering@cloudbees.io

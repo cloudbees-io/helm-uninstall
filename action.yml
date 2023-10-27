@@ -1,0 +1,60 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: action
+name: 'Helm chart un-install'
+description: 'Using helm to un-install a chart'
+inputs:
+  release-name:
+    description: 'Helm release name'
+    required: true
+  namespace:
+    description: 'Kubernetes namespace to un-install the chart from'
+    default: default
+  timeout:
+    description: 'Helm chart un-installation timeout'
+    default: 5m
+  keep-history:
+    description: 'remove all associated resources and mark the release as deleted, but retain the release history'
+    default: 'false'
+  debug:
+    description: 'Execute the helm command in debug mode'
+    default: 'false'
+  env-vars-file:
+    description: >
+      An optional file with key value pairs of the format 'export key=value'
+      to export in the environment before execution of the helm commands.
+  dry-run:
+    description: 'Simulate an un-install, without actually doing it'
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - id: helm-uninstall
+      name: Un-install a Helm chart
+      uses: docker://registry.saas-dev.beescloud.com/staging/helm-uninstall-action:latest
+      shell: bash
+      run: |
+        set -uo pipefail
+        envVarsFile=${{ inputs.env-vars-file }}
+        if [ ! -z ${envVarsFile} ]; then
+          source ${envVarsFile}
+        fi
+
+        helmDebug=${{ inputs.debug }}
+        debugArg=''
+        if [ $helmDebug == 'true' ]; then
+          debugArg='--debug'
+        fi
+
+        keepHistory=${{ inputs.keep-history }}
+        keepHistoryArg=''
+        if [ $keepHistory == 'true' ]; then
+          keepHistoryArg='--keep-history'
+        fi
+
+        echo "Un-installing helm release ${RELEASE_NAME} from namespace ${HELM_NAMESPACE} with dry run set to ${{ inputs.dry-run == 'true' }}"
+        helm uninstall "$RELEASE_NAME" --dry-run=${{ inputs.dry-run == 'true' }} --wait --keep-history=${{ inputs.keep-history == 'true' }}
+      env:
+        RELEASE_NAME: ${{ inputs.release-name }}
+        HELM_NAMESPACE: ${{ inputs.namespace }}
+        HELM_DEBUG: ${{ inputs.debug == 'true' }}
