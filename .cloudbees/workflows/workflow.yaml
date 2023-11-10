@@ -17,22 +17,37 @@ jobs:
         echo -e "${{ secrets.STAGING_CONFIG }}" > ${HOME}/.kube/config
     - name: checkout
       uses: cloudbees-io/checkout@v1
+    - id: createns
+      name: Create Kubernetes Namespace
+      uses: cloudbees-io/create-k8s-namespace@v1
+      with:
+        name: ${{ format('{0}{1}{2}', cloudbees.scm.branch, cloudbees.scm.repository, cloudbees.scm.sha) }}
+        sanitize-name: "true"
+        labels: |
+          cloudbees.io/cleanup: "true"
     - name: install a helm chart
       uses: cloudbees-io/helm-install@v1
       with:
-        release-name: nginx-uninstall
-        chart-location: oci://ghcr.io/nginxinc/charts/nginx-ingress
-        version: 0.18.0
+        release-name: nginx-example
+        chart-location: oci://registry-1.docker.io/bitnamicharts/nginx
+        version: 15.4.2
+        namespace: ${{ steps.createns.outputs.name }}
+        timeout: 1m
+        values: |
+          service:
+            type: ClusterIP
     - name: uninstall a helm chart with dry-run
       uses: .
       with:
-        release-name: nginx-uninstall
+        release-name: nginx-example
+        namespace: ${{ steps.createns.outputs.name }}
         timeout: 1m
         dry-run: "true"
     - name: uninstall a helm chart
       uses: .
       with:
-        release-name: nginx-uninstall
+        release-name: nginx-example
+        namespace: ${{ steps.createns.outputs.name }}
         timeout: 1m
   build:
     steps:
@@ -48,6 +63,5 @@ jobs:
     - name: docker build and publish
       uses: cloudbees-io/kaniko@v1
       with:
-        dockerconfigjson: ${{ secrets.dockerconfigjson }}
         destination: registry.saas-dev.beescloud.com/staging/helm-uninstall-action:${{ cloudbees.scm.branch }}${{ cloudbees.scm.branch == 'main' && ',registry.saas-dev.beescloud.com/staging/helm-uninstall-action:latest' || '' }}
         labels: maintaner=sdp-pod-3,email=engineering@cloudbees.io

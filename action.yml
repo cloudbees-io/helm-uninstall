@@ -31,7 +31,7 @@ runs:
   steps:
     - id: helm-uninstall
       name: Un-install a Helm chart
-      uses: docker://registry.saas-dev.beescloud.com/staging/helm-uninstall-action:latest
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/helm-uninstall-action:1.0.0
       shell: bash
       run: |
         set -uo pipefail
