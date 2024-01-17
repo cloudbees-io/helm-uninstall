@@ -1,4 +1,4 @@
-FROM alpine/helm:3.12.1
+FROM alpine/helm:3.13.3
 
 # Install aws-cli
 RUN apk update && \
