@@ -59,6 +59,16 @@ jobs:
         release-name: nginx-example
         namespace: ${{ steps.createns.outputs.name }}
         timeout: 1m
+    - name: verify remote/OCI chart was removed
+      uses: docker://alpine/k8s:1.27.3
+      run: |
+        set -ux
+        EXPECTED='Error from server (NotFound): deployments.apps "nginx" not found'
+        ACTUAL="$(kubectl get deployment nginx -n ${{ steps.createns.outputs.name }})"
+        if [ "$ACTUAL" != "$EXPECTED" ]; then
+          echo "Deployment still exists"
+          exit 1
+        fi
   build:
     if: cloudbees.api.url == 'https://api.saas-preprod.beescloud.com' || cloudbees.api.url == 'https://api.cloudbees.io'
     permissions:
