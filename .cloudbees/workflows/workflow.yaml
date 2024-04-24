@@ -63,8 +63,8 @@ jobs:
       uses: docker://alpine/k8s:1.27.3
       run: |
         set -ux
-        EXPECTED='Error from server (NotFound): deployments.apps "nginx" not found'
-        ACTUAL="$(kubectl get deployment nginx -n ${{ steps.createns.outputs.name }})"
+        EXPECTED='Error from server (NotFound): deployments.apps "nginx-example" not found'
+        ACTUAL="$(kubectl get deployment nginx-example -n ${{ steps.createns.outputs.name }} 2>&1)"
         if [ "$ACTUAL" != "$EXPECTED" ]; then
           echo "Deployment still exists"
           exit 1
