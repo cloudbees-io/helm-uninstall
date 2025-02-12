@@ -1,3 +1,3 @@
-FROM alpine/helm:3.16.1
+FROM alpine/helm:3.17.0
 ## Removed wget due Vulnerability ##
 RUN apk del wget
