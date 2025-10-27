@@ -12,4 +12,5 @@ RUN set -eux; \
                            libcurl \
                            curl \
                            musl-utils \
-                           yq-go
+                           yq-go; \
+    apk upgrade --no-cache pcre2
