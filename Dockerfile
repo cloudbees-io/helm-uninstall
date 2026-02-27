@@ -1,4 +1,4 @@
-FROM alpine/helm:3.20.0
+FROM alpine/helm:4.1.1
 # Update Packages to address Security Issues
 RUN set -eux; \
     apk upgrade --no-cache apk-tools \
@@ -14,4 +14,4 @@ RUN set -eux; \
                            musl-utils \
                            yq-go; \
     apk upgrade --no-cache pcre2; \
-    apk add --no-cache libexpat=2.7.3-r0
+    apk add --no-cache libexpat=2.7.4-r0
