@@ -1,4 +1,4 @@
-= CloudBees action: Uninstall a Helm chart
+= CloudBees action: Uninstall a Helm chart 
 
 Use this action to uninstall a Helm chart release from a Kubernetes cluster.
 
