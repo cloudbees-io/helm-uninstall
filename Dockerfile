@@ -12,6 +12,4 @@ RUN set -eux; \
                            libcurl \
                            curl \
                            musl-utils \
-                           yq-go; \
-    apk upgrade --no-cache pcre2; \
-    apk add --no-cache libexpat=2.7.4-r0
+                           yq-go
