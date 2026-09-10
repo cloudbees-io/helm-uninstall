@@ -1,4 +1,4 @@
-FROM alpine/helm:3.21.3
+FROM alpine/helm:4.3.0
 # Update Packages to address Security Issues
 RUN set -eux; \
     apk upgrade --no-cache apk-tools \
