@@ -13,4 +13,5 @@ RUN set -eux; \
                            curl \
                            musl-utils \
                            yq-go \
-                           brotli-libs
+                           brotli-libs \
+                           zlib
